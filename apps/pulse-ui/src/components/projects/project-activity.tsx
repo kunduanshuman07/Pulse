@@ -40,13 +40,20 @@ type AgentExecution = {
     logs: string;
 };
 
+import type { ContentLanguage } from "../../types/language";
+
 type Props = {
     analyses: Analysis[];
+
+    displayLanguage?: ContentLanguage;
 };
 
 export function ProjectActivity({
     analyses,
+    displayLanguage = "en",
 }: Props) {
+    const isHindi =
+        displayLanguage === "hi";
     const latestAnalysis =
         analyses?.[0];
 
@@ -80,7 +87,9 @@ export function ProjectActivity({
                 <div className="relative z-10 flex flex-col gap-8 xl:flex-row xl:items-start xl:justify-between">
                     <div className="min-w-0">
                         <p className="mb-4 text-xs uppercase tracking-[0.3em] text-cyan-300/70 md:text-sm">
-                            AI INTELLIGENCE OVERVIEW
+                            {isHindi
+                                ? "एआई बुद्धिमत्ता अवलोकन"
+                                : "AI INTELLIGENCE OVERVIEW"}
                         </p>
 
                         <h1 className="mb-5 text-4xl font-semibold tracking-tight md:text-6xl">

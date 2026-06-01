@@ -6,12 +6,16 @@ import {
     Sparkles,
 } from "lucide-react";
 
+import type { ContentLanguage } from "../../types/language";
+
 type Props = {
     projectId: string;
 
     onRunAnalysis: () => void;
 
     loadingAnalysis: boolean;
+
+    contentLanguage?: ContentLanguage;
 
     latestAnalysis?: {
         intelligenceScore: number;
@@ -24,7 +28,10 @@ export function ProjectHero({
     onRunAnalysis,
     loadingAnalysis,
     latestAnalysis,
+    contentLanguage = "en",
 }: Props) {
+    const isHindi =
+        contentLanguage === "hi";
     return (
         <section className="glass-card glow-primary relative overflow-hidden rounded-[32px] p-5 md:p-8 xl:p-12">
             {/* GLOWS */}
@@ -44,7 +51,9 @@ export function ProjectHero({
                         />
 
                         <p className="text-xs uppercase tracking-[0.25em] text-cyan-300">
-                            AI PRODUCT INTELLIGENCE
+                            {isHindi
+                                ? "एआई उत्पाद बुद्धिमत्ता"
+                                : "AI PRODUCT INTELLIGENCE"}
                         </p>
                     </div>
 
@@ -126,8 +135,12 @@ export function ProjectHero({
                         />
 
                         {loadingAnalysis
-                            ? "Running Analysis..."
-                            : "Run AI Analysis"}
+                            ? isHindi
+                                ? "विश्लेषण चल रहा है..."
+                                : "Running Analysis..."
+                            : isHindi
+                              ? "एआई विश्लेषण चलाएं"
+                              : "Run AI Analysis"}
                     </motion.button>
 
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-1">

@@ -10,6 +10,8 @@ import { toast } from "sonner";
 import { X } from "lucide-react";
 import { useAuth } from "../../context/auth-context";
 import { projectsService } from "../../service/projects.service";
+import { ContentLanguageSelector } from "./content-language-selector";
+import type { ContentLanguage } from "../../types/language";
 
 
 
@@ -40,8 +42,18 @@ export function CreateProjectModal({
     const [description, setDescription] =
         useState("");
 
+    const [
+        contentLanguage,
+        setContentLanguage,
+    ] = useState<ContentLanguage>("en");
+
     const [loading, setLoading] =
         useState(false);
+
+    const inputLang =
+        contentLanguage === "hi"
+            ? "hi"
+            : undefined;
 
     const handleCreateProject =
         async () => {
@@ -67,6 +79,8 @@ export function CreateProjectModal({
                         category,
 
                         description,
+
+                        contentLanguage,
                     },
 
                     token as string,
@@ -81,6 +95,8 @@ export function CreateProjectModal({
                 setCategory("");
 
                 setDescription("");
+
+                setContentLanguage("en");
 
                 onCreated();
 
@@ -162,6 +178,15 @@ export function CreateProjectModal({
                         {/* FORM */}
 
                         <div className="relative z-10 space-y-6">
+                            <ContentLanguageSelector
+                                value={
+                                    contentLanguage
+                                }
+                                onChange={
+                                    setContentLanguage
+                                }
+                            />
+
                             {/* NAME */}
 
                             <div>
@@ -171,6 +196,7 @@ export function CreateProjectModal({
 
                                 <input
                                     value={name}
+                                    lang={inputLang}
                                     onChange={(e) =>
                                         setName(
                                             e
@@ -178,7 +204,12 @@ export function CreateProjectModal({
                                                 .value,
                                         )
                                     }
-                                    placeholder="Pulse AI"
+                                    placeholder={
+                                        contentLanguage ===
+                                        "hi"
+                                            ? "पल्स एआई"
+                                            : "Pulse AI"
+                                    }
                                     className="h-14 w-full rounded-2xl border border-white/10 bg-white/[0.03] px-5 text-white outline-none transition-all duration-300 placeholder:text-white/25 focus:border-cyan-400/30 focus:bg-cyan-400/[0.03]"
                                 />
                             </div>
@@ -194,6 +225,7 @@ export function CreateProjectModal({
                                     value={
                                         category
                                     }
+                                    lang={inputLang}
                                     onChange={(e) =>
                                         setCategory(
                                             e
@@ -201,7 +233,12 @@ export function CreateProjectModal({
                                                 .value,
                                         )
                                     }
-                                    placeholder="AI SaaS"
+                                    placeholder={
+                                        contentLanguage ===
+                                        "hi"
+                                            ? "एआई SaaS"
+                                            : "AI SaaS"
+                                    }
                                     className="h-14 w-full rounded-2xl border border-white/10 bg-white/[0.03] px-5 text-white outline-none transition-all duration-300 placeholder:text-white/25 focus:border-cyan-400/30 focus:bg-cyan-400/[0.03]"
                                 />
                             </div>
@@ -217,6 +254,7 @@ export function CreateProjectModal({
                                     value={
                                         description
                                     }
+                                    lang={inputLang}
                                     onChange={(e) =>
                                         setDescription(
                                             e
@@ -224,7 +262,12 @@ export function CreateProjectModal({
                                                 .value,
                                         )
                                     }
-                                    placeholder="Describe your product vision, market, audience, and launch goals..."
+                                    placeholder={
+                                        contentLanguage ===
+                                        "hi"
+                                            ? "अपने उत्पाद विजन, बाजार, दर्शक और लॉन्च लक्ष्यों का वर्णन करें..."
+                                            : "Describe your product vision, market, audience, and launch goals..."
+                                    }
                                     className="min-h-[180px] w-full resize-none rounded-3xl border border-white/10 bg-white/[0.03] p-5 text-white outline-none transition-all duration-300 placeholder:text-white/25 focus:border-cyan-400/30 focus:bg-cyan-400/[0.03]"
                                 />
                             </div>

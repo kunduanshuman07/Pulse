@@ -1,19 +1,28 @@
+import type { ContentLanguage } from "../../types/language";
+
 type ProjectStatsProps = {
     latestAnalysis?: {
         intelligenceScore: number;
     };
+
+    displayLanguage?: ContentLanguage;
 };
 
 export function ProjectStats({
     latestAnalysis,
+    displayLanguage = "en",
 }: ProjectStatsProps) {
+    const isHindi =
+        displayLanguage === "hi";
     const intelligence =
         latestAnalysis?.intelligenceScore ||
         0;
 
     const stats = [
         {
-            label: "Market Score",
+            label: isHindi
+                ? "बाजार स्कोर"
+                : "Market Score",
 
             value: `${intelligence}%`,
 
@@ -22,32 +31,45 @@ export function ProjectStats({
         },
 
         {
-            label: "Audience Match",
+            label: isHindi
+                ? "दर्शक मिलान"
+                : "Audience Match",
 
             value:
                 intelligence > 80
-                    ? "Excellent"
-                    : "Moderate",
+                    ? isHindi
+                        ? "उत्कृष्ट"
+                        : "Excellent"
+                    : isHindi
+                      ? "मध्यम"
+                      : "Moderate",
 
             color:
                 "text-emerald-300",
         },
 
         {
-            label: "Trend Direction",
+            label: isHindi
+                ? "ट्रेंड दिशा"
+                : "Trend Direction",
 
             value:
                 intelligence > 75
-                    ? "Rising"
-                    : "Stable",
+                    ? isHindi
+                        ? "बढ़ता"
+                        : "Rising"
+                    : isHindi
+                      ? "स्थिर"
+                      : "Stable",
 
             color:
                 "text-violet-300",
         },
 
         {
-            label:
-                "Virality Potential",
+            label: isHindi
+                ? "वायरल संभावना"
+                : "Virality Potential",
 
             value: `${Math.max(
                 intelligence -

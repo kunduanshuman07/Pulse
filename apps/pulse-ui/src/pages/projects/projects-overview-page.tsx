@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useParams } from "react-router-dom";
 
@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { useAuth } from "../../context/auth-context";
 
 import { analysisService } from "../../service/analysis.service";
+import { projectsService } from "../../service/projects.service";
 
 import { ProjectHero } from "../../components/projects/project-hero";
 
@@ -24,8 +25,16 @@ import { RiskHeatmap } from "../../components/projects/risk-heatmap";
 
 import { AnalysisProcessingOverlay } from "../../components/projects/analysis-processing-overlay";
 
+import { AnalysisLanguageBar } from "../../components/projects/analysis-language-bar";
+
 import { env } from "../../config/env";
 import { usePageTitle } from "../../hooks/use-page-title";
+import {
+    resolveLocalizedAnalysis,
+    type AnalysisView,
+} from "../../lib/analysis-localization";
+import type { ContentLanguage } from "../../types/language";
+import { isContentLanguage } from "../../types/language";
 
 type StreamEvent = {
     event: string;
@@ -37,36 +46,12 @@ type StreamEvent = {
     progress: number;
 };
 
-type AgentExecution = {
+type Project = {
     id: string;
 
-    agentType: string;
+    name: string;
 
-    status: string;
-
-    score: number;
-
-    summary: string;
-
-    insights: string[];
-
-    risks: string[];
-
-    logs: string;
-};
-
-type Analysis = {
-    id: string;
-
-    status: string;
-
-    intelligenceScore: number;
-
-    summary: string;
-
-    createdAt: string;
-
-    agentExecutions: AgentExecution[];
+    contentLanguage?: ContentLanguage;
 };
 
 export function ProjectOverviewPage() {
@@ -78,10 +63,27 @@ export function ProjectOverviewPage() {
     const { token } =
         useAuth();
 
+    const [project, setProject] =
+        useState<Project | null>(
+            null,
+        );
+
     const [analyses, setAnalyses] =
-        useState<Analysis[]>(
+        useState<AnalysisView[]>(
             [],
         );
+
+    const [
+        displayLanguage,
+        setDisplayLanguage,
+    ] = useState<ContentLanguage>(
+        "en",
+    );
+
+    const [
+        translating,
+        setTranslating,
+    ] = useState(false);
 
     const [
         loadingAnalysis,
@@ -95,14 +97,54 @@ export function ProjectOverviewPage() {
         StreamEvent[]
     >([]);
 
+    const fetchProject =
+        useCallback(async () => {
+            if (!id || !token) {
+                return;
+            }
+
+            try {
+                const response =
+                    await projectsService.getProjectById(
+                        id,
+                        token,
+                    );
+
+                const projectData =
+                    response?.data;
+
+                setProject(projectData);
+
+                const language =
+                    projectData?.contentLanguage;
+
+                if (
+                    isContentLanguage(
+                        language,
+                    )
+                ) {
+                    setDisplayLanguage(
+                        language,
+                    );
+                }
+            } catch {
+                toast.error(
+                    "Failed to fetch project",
+                );
+            }
+        }, [id, token]);
+
     const fetchAnalyses =
-        async () => {
+        useCallback(async () => {
+            if (!id || !token) {
+                return;
+            }
+
             try {
                 const response =
                     await analysisService.getProjectAnalyses(
-                        id as string,
-
-                        token as string,
+                        id,
+                        token,
                     );
 
                 setAnalyses(
@@ -114,11 +156,91 @@ export function ProjectOverviewPage() {
                     "Failed to fetch analyses",
                 );
             }
-        };
+        }, [id, token]);
 
     useEffect(() => {
+        fetchProject();
+
         fetchAnalyses();
-    }, []);
+    }, [fetchProject, fetchAnalyses]);
+
+    const latestAnalysis =
+        analyses[0];
+
+    const localizedLatestAnalysis =
+        useMemo(
+            () =>
+                resolveLocalizedAnalysis(
+                    latestAnalysis,
+                    displayLanguage,
+                ),
+            [
+                latestAnalysis,
+                displayLanguage,
+            ],
+        );
+
+    const localizedAnalyses =
+        useMemo(
+            () =>
+                analyses.map(
+                    (analysis) =>
+                        resolveLocalizedAnalysis(
+                            analysis,
+                            displayLanguage,
+                        )!,
+                ),
+            [
+                analyses,
+                displayLanguage,
+            ],
+        );
+
+    const handleDisplayLanguageChange =
+        async (
+            language: ContentLanguage,
+        ) => {
+            setDisplayLanguage(
+                language,
+            );
+
+            if (
+                !latestAnalysis ||
+                !token ||
+                latestAnalysis.outputLanguage ===
+                    language ||
+                latestAnalysis
+                    .translations?.[
+                    language
+                ]
+            ) {
+                return;
+            }
+
+            try {
+                setTranslating(true);
+
+                await analysisService.translateAnalysis(
+                    latestAnalysis.id,
+                    token,
+                    language,
+                );
+
+                await fetchAnalyses();
+
+                toast.success(
+                    language === "hi"
+                        ? "Analysis translated to Hindi"
+                        : "Analysis translated to English",
+                );
+            } catch {
+                toast.error(
+                    "Translation failed. Showing original language.",
+                );
+            } finally {
+                setTranslating(false);
+            }
+        };
 
     const runAnalysis =
         async () => {
@@ -136,7 +258,10 @@ export function ProjectOverviewPage() {
                 );
 
                 toast.loading(
-                    "AI agents analyzing project...",
+                    displayLanguage ===
+                        "hi"
+                        ? "एआई एजेंट परियोजना का विश्लेषण कर रहे हैं..."
+                        : "AI agents analyzing project...",
                     {
                         id: "analysis",
                     },
@@ -180,7 +305,10 @@ export function ProjectOverviewPage() {
                                     );
 
                                     toast.success(
-                                        "AI analysis completed successfully",
+                                        displayLanguage ===
+                                            "hi"
+                                            ? "एआई विश्लेषण सफलतापूर्वक पूर्ण हुआ"
+                                            : "AI analysis completed successfully",
                                         {
                                             id: "analysis",
                                         },
@@ -198,7 +326,10 @@ export function ProjectOverviewPage() {
                 );
             } catch {
                 toast.error(
-                    "Failed to start analysis",
+                    displayLanguage ===
+                        "hi"
+                        ? "विश्लेषण शुरू करने में विफल"
+                        : "Failed to start analysis",
                     {
                         id: "analysis",
                     },
@@ -211,9 +342,6 @@ export function ProjectOverviewPage() {
                 eventSource?.close();
             }
         };
-
-    const latestAnalysis =
-        analyses[0];
 
     return (
         <div className="space-y-6 sm:space-y-8">
@@ -228,19 +356,39 @@ export function ProjectOverviewPage() {
                     loadingAnalysis
                 }
                 latestAnalysis={
-                    latestAnalysis
+                    localizedLatestAnalysis
+                }
+                contentLanguage={
+                    project?.contentLanguage
                 }
             />
 
+            {latestAnalysis && (
+                <AnalysisLanguageBar
+                    value={
+                        displayLanguage
+                    }
+                    onChange={
+                        handleDisplayLanguageChange
+                    }
+                    translating={
+                        translating
+                    }
+                />
+            )}
+
             <ProjectStats
                 latestAnalysis={
-                    latestAnalysis
+                    localizedLatestAnalysis
+                }
+                displayLanguage={
+                    displayLanguage
                 }
             />
 
             <MarketConfidenceGauge
                 score={
-                    latestAnalysis
+                    localizedLatestAnalysis
                         ?.intelligenceScore ||
                     0
                 }
@@ -248,7 +396,7 @@ export function ProjectOverviewPage() {
 
             <AgentRadarChart
                 agentExecutions={
-                    latestAnalysis
+                    localizedLatestAnalysis
                         ?.agentExecutions ||
                     []
                 }
@@ -256,7 +404,7 @@ export function ProjectOverviewPage() {
 
             <StrategicRecommendations
                 agentExecutions={
-                    latestAnalysis
+                    localizedLatestAnalysis
                         ?.agentExecutions ||
                     []
                 }
@@ -264,14 +412,19 @@ export function ProjectOverviewPage() {
 
             <RiskHeatmap
                 agentExecutions={
-                    latestAnalysis
+                    localizedLatestAnalysis
                         ?.agentExecutions ||
                     []
                 }
             />
 
             <ProjectActivity
-                analyses={analyses}
+                analyses={
+                    localizedAnalyses
+                }
+                displayLanguage={
+                    displayLanguage
+                }
             />
 
             <AnalysisProcessingOverlay
@@ -280,6 +433,9 @@ export function ProjectOverviewPage() {
                 }
                 events={
                     streamEvents
+                }
+                displayLanguage={
+                    displayLanguage
                 }
             />
         </div>

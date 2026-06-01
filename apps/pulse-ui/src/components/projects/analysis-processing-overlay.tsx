@@ -18,16 +18,23 @@ type StreamEvent = {
     progress: number;
 };
 
+import type { ContentLanguage } from "../../types/language";
+
 type Props = {
     visible: boolean;
 
     events: StreamEvent[];
+
+    displayLanguage?: ContentLanguage;
 };
 
 export function AnalysisProcessingOverlay({
     visible,
     events,
+    displayLanguage = "en",
 }: Props) {
+    const isHindi =
+        displayLanguage === "hi";
     const latestProgress =
         events[
             events.length - 1
@@ -67,11 +74,15 @@ export function AnalysisProcessingOverlay({
 
                                 <div className="min-w-0">
                                     <p className="mb-2 text-xs uppercase tracking-[0.3em] text-cyan-300/70 sm:text-sm sm:tracking-[0.35em]">
-                                        AI ORCHESTRATION ACTIVE
+                                        {isHindi
+                                            ? "एआई ऑर्केस्ट्रेशन सक्रिय"
+                                            : "AI ORCHESTRATION ACTIVE"}
                                     </p>
 
                                     <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl md:text-5xl">
-                                        Running Analysis
+                                        {isHindi
+                                            ? "विश्लेषण चल रहा है"
+                                            : "Running Analysis"}
                                     </h1>
                                 </div>
                             </div>
@@ -156,7 +167,9 @@ export function AnalysisProcessingOverlay({
                             <div className="mt-10">
                                 <div className="mb-4 flex items-center justify-between">
                                     <p className="text-sm text-white/45">
-                                        AI Intelligence Pipeline
+                                        {isHindi
+                                            ? "एआई बुद्धिमत्ता पाइपलाइन"
+                                            : "AI Intelligence Pipeline"}
                                     </p>
 
                                     <p className="text-sm font-medium text-cyan-300">

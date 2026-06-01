@@ -34,11 +34,26 @@ class AnalysisEngine:
             if result.score >= 85
         ]
 
-        summary = (
-            "The project demonstrates strong potential in "
-            f"{', '.join(high_score_agents)} with favorable "
-            "market alignment and growth indicators."
+        agents_label = (
+            ", ".join(high_score_agents)
+            if high_score_agents
+            else "key intelligence agents"
         )
+
+        if context.language == "hi":
+            summary = (
+                "यह परियोजना "
+                f"{agents_label} "
+                "में मजबूत संभावना दिखाती है, जिसमें "
+                "अनुकूल बाजार संरेखण और विकास "
+                "संकेतक शामिल हैं।"
+            )
+        else:
+            summary = (
+                "The project demonstrates strong potential in "
+                f"{agents_label} with favorable "
+                "market alignment and growth indicators."
+            )
 
         return AnalysisResult(
             overall_score=overall_score,

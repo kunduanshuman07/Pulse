@@ -1,8 +1,15 @@
+from prompts.language import (
+    language_instruction,
+)
+
+
 def build_audience_prompt(
     context,
 ):
     return f"""
 You are an elite AI audience intelligence analyst.
+
+{language_instruction(context.language)}
 
 Analyze this startup/project.
 

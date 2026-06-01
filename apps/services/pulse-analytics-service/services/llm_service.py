@@ -48,3 +48,28 @@ class LLMService:
                 [],
             ),
         }
+
+    def generate_raw(
+        self,
+        prompt: str,
+    ) -> str:
+        response = ollama.chat(
+            model="llama3.1",
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You return only valid JSON. "
+                        "No markdown or explanations."
+                    ),
+                },
+                {
+                    "role": "user",
+                    "content": prompt,
+                },
+            ],
+        )
+
+        return response[
+            "message"
+        ]["content"]

@@ -1,7 +1,16 @@
 from fastapi import FastAPI
 from orchestrator.analysis_engine import AnalysisEngine
 from schemas.project_schema import ProjectContext
-from schemas.api_schema import AnalyzeProjectRequest
+from schemas.api_schema import (
+    AnalyzeProjectRequest,
+    TranslateAnalysisRequest,
+)
+from schemas.analysis_schema import (
+    AnalysisResult,
+)
+from services.localization_service import (
+    LocalizationService,
+)
 from routes.stream_routes import (
     router as stream_router,
 )
@@ -27,6 +36,7 @@ app.include_router(
 
 
 engine = AnalysisEngine()
+localization_service = LocalizationService()
 
 
 @app.get("/health")
@@ -45,7 +55,28 @@ def analyze_project(
         description=payload.description,
         industry=payload.industry,
         target_market=payload.target_market,
+        language=payload.language or "en",
     )
 
     result = engine.analyze(context)
     return result
+
+
+@app.post("/translate")
+def translate_analysis(
+    payload: TranslateAnalysisRequest,
+):
+    result = AnalysisResult(
+        overall_score=payload.overall_score,
+        summary=payload.summary,
+        agents=payload.agents,
+    )
+
+    translated = (
+        localization_service.translate_analysis(
+            result,
+            payload.target_language,
+        )
+    )
+
+    return translated

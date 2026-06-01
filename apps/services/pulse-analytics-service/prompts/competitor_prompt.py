@@ -1,8 +1,15 @@
+from prompts.language import (
+    language_instruction,
+)
+
+
 def build_competitor_prompt(
     context,
 ):
     return f"""
 You are an elite AI competitor intelligence analyst.
+
+{language_instruction(context.language)}
 
 Analyze this startup/project.
 

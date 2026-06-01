@@ -41,6 +41,8 @@ export const projectsService = {
             category: string;
 
             description: string;
+
+            contentLanguage?: "en" | "hi";
         },
 
         token: string,

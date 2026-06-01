@@ -1,8 +1,15 @@
+from prompts.language import (
+    language_instruction,
+)
+
+
 def build_trend_prompt(
     context,
 ):
     return f"""
 You are an elite AI market trend analyst.
+
+{language_instruction(context.language)}
 
 Analyze this startup/project.
 

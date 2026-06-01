@@ -9,3 +9,5 @@ class ProjectContext(BaseModel):
     industry: str
 
     target_market: str
+
+    language: str = "en"

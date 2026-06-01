@@ -39,4 +39,27 @@ export const analysisService = {
 
         return response.data;
     },
+
+    translateAnalysis: async (
+        analysisId: string,
+
+        token: string,
+
+        targetLanguage: "en" | "hi" = "hi",
+    ) => {
+        const response =
+            await api.post(
+                `/analysis/${analysisId}/translate`,
+                {
+                    targetLanguage,
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                },
+            );
+
+        return response.data;
+    },
 };

@@ -1,8 +1,15 @@
+from prompts.language import (
+    language_instruction,
+)
+
+
 def build_virality_prompt(
     context,
 ):
     return f"""
 You are an elite AI virality prediction analyst.
+
+{language_instruction(context.language)}
 
 Analyze this startup/project.
 
