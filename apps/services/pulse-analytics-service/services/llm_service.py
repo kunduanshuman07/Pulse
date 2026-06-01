@@ -1,75 +1,42 @@
-import json
+from openai import OpenAI
 
-import ollama
+import os
 
 
 class LLMService:
+    def __init__(self):
+        self.client = OpenAI(
+            base_url=
+                "https://openrouter.ai/api/v1",
+
+            api_key=os.getenv(
+                "OPENROUTER_API_KEY"
+            ),
+        )
+
     def generate(
         self,
         prompt: str,
     ):
-        response = ollama.chat(
-            model="llama3.1",
+        completion = (
+            self.client.chat.completions.create(
+                model="openrouter/free",
 
-            messages=[
-                {
-                    "role": "system",
-                    "content": (
-                        "You are an elite AI "
-                        "product intelligence analyst."
-                    ),
-                },
-                {
-                    "role": "user",
-                    "content": prompt,
-                },
-            ],
+                messages=[
+                    {
+                        "role":
+                            "user",
+
+                        "content":
+                            prompt,
+                    }
+                ],
+            )
         )
 
-        content = response[
-            "message"
-        ]["content"]
-
-        parsed = json.loads(content)
-
-        return {
-            "summary": parsed.get(
-                "summary",
-                "No summary generated",
-            ),
-
-            "insights": parsed.get(
-                "insights",
-                [],
-            ),
-
-            "risks": parsed.get(
-                "risks",
-                [],
-            ),
-        }
-
-    def generate_raw(
-        self,
-        prompt: str,
-    ) -> str:
-        response = ollama.chat(
-            model="llama3.1",
-            messages=[
-                {
-                    "role": "system",
-                    "content": (
-                        "You return only valid JSON. "
-                        "No markdown or explanations."
-                    ),
-                },
-                {
-                    "role": "user",
-                    "content": prompt,
-                },
-            ],
+        return (
+            completion
+            .choices[0]
+            .message
+            .content
         )
-
-        return response[
-            "message"
-        ]["content"]

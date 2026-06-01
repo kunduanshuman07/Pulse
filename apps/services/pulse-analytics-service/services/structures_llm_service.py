@@ -64,7 +64,9 @@ class StructuredLLMService:
                     ),
                 }
 
-            except Exception:
+            except Exception as error:
+                print(error)
+
                 if (
                     attempt
                     == retries - 1

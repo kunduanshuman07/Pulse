@@ -1,4 +1,7 @@
 from fastapi import FastAPI
+from dotenv import load_dotenv
+
+load_dotenv()
 from orchestrator.analysis_engine import AnalysisEngine
 from schemas.project_schema import ProjectContext
 from schemas.api_schema import (
