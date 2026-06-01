@@ -7,9 +7,7 @@ import { ResponseInterceptor } from './common/interceptors/respponse.interceptor
 import { AllExceptionsFilter } from './common/filters/all.exceptions.filter';
 
 async function bootstrap() {
-    const app = await NestFactory.create(AppModule, {
-        logger: false,
-    });
+    const app = await NestFactory.create(AppModule);
 
     app.enableCors();
 
