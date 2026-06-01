@@ -42,6 +42,8 @@ import { AgentExecutionModule } from './modules/agent-execution/agent-execution.
                     ssl: {
                         rejectUnauthorized: false,
                     },
+
+                    extra: { ssl: { rejectUnauthorized: false, }, }, retryAttempts: 5, retryDelay: 3000,
                 };
             },
         }),

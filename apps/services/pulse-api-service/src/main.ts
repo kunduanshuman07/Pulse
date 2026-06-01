@@ -54,12 +54,12 @@ async function bootstrap() {
 
     SwaggerModule.setup('docs', app, document);
 
-    const port = process.env.PORT || 3000;
-
-    await app.listen(port);
+    await app.listen(
+        process.env.PORT || 3000,
+    );
 
     winstonLogger.info(
-        `Pulse API running on http://localhost:${port}`,
+        `Pulse API running`,
     );
 }
 
